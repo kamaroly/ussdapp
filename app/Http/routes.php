@@ -18,3 +18,6 @@ Route::get('/mhealth','\App\Http\Controllers\MhealthController@index');
 
 /** PACKAGE USAGE ROUTE */
 Route::get('/packageusage','\App\Http\Controllers\PackageUsageController@index');
+
+/** OPT ROUTE */
+Route::get('/opt','\App\Http\Controllers\OptInOptOutController@index');
