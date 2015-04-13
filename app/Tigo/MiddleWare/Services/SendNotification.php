@@ -33,8 +33,8 @@ class SendNotification extends MiddleWareRequest implements  SendNotificationInt
 			      <cor:debugFlag>true</cor:debugFlag>
 			      <wsse:Security>
 			         <wsse:UsernameToken>
-			            <wsse:Username>test_mw_osb</wsse:Username>
-			            <wsse:Password>tigo1234</wsse:Password>
+			            <wsse:Username>'.env('MW_USERNAME').'</wsse:Username>
+			            <wsse:Password>'.env('MW_PASSWORD').'</wsse:Password>
 			         </wsse:UsernameToken>
 			      </wsse:Security>
 			   </soapenv:Header>
