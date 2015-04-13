@@ -10,8 +10,12 @@
 | and give it the controller to call when that URI is requested.
 |
 */
-
-Route::get('/',['as' => 'home','uses' => 'WelcomeController@index']);
+Route::get('/test', function()
+{
+ $response 	= 	(new App\Tigo\MiddleWare\Services\SendNotification)->send('TIGO','250722123127','SMS FOR PACKAGE');
+  
+  dd($response);
+});
 
 /** MHealth ROUTE */
 Route::get('/mhealth','\App\Http\Controllers\MhealthController@index');
