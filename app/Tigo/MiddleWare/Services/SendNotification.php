@@ -6,13 +6,14 @@ use App\Tigo\Interfaces\SendNotificationInterface;
 
 class SendNotification extends MiddleWareRequest implements  SendNotificationInterface
 {
-	public $url 	= 	'http://10.138.84.227:8002/osb/services/SendNotification_1_0';
 	public $from;
 	public $to;
 	public $message;
 	
 	public  function send($from,$to,$message)
 	{
+
+	  $this->url = env('URL_SEND_NOTIFICATION');
 
 	  $this->from 		=	$from;
 	  $this->to 		= 	$to;
@@ -34,7 +35,7 @@ class SendNotification extends MiddleWareRequest implements  SendNotificationInt
 			      <wsse:Security>
 			         <wsse:UsernameToken>
 			            <wsse:Username>'.env('MW_USERNAME').'</wsse:Username>
-			            <wsse:Password>'.env('MW_PASSWORD').'</wsse:Password>
+	           			<wsse:Password>'.env('MW_PASSWORD').'</wsse:Password>
 			         </wsse:UsernameToken>
 			      </wsse:Security>
 			   </soapenv:Header>
@@ -72,5 +73,19 @@ class SendNotification extends MiddleWareRequest implements  SendNotificationInt
 			</soapenv:Envelope>';
 
 	return $request;
+	}
+
+	/**
+	 * Clean the xml response
+	 */
+	public function cleanResponse($soapXMLResult)
+	{
+		$doc = new DOMDocument();
+		
+		$doc->loadXML( $soapXMLResult );
+		
+		$status = $doc->getElementsByTagName("status")->item(0)->nodeValue;
+
+		return (strtolower($status) == 'ok');
 	}
 }

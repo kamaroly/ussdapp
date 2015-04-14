@@ -12,6 +12,8 @@ class MhealthController extends Controller {
 
 	private $request;
 
+	protected $logfile = '/logs/ussd_Mhealth.log';
+
 	public function __construct(Request $request)
 	{
 		$this->request = $request;

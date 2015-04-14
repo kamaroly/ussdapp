@@ -17,6 +17,7 @@ Route::get('/test', function()
   dd($response);
 });
 
+
 /** MHealth ROUTE */
 Route::get('/mhealth','\App\Http\Controllers\MhealthController@index');
 

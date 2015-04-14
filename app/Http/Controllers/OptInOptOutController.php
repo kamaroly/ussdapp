@@ -1,7 +1,10 @@
 <?php namespace App\Http\Controllers;
 
+use App\Models\OriginalCOS;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
+use App\Tigo\MiddleWare\Services\SetCosService;
+use App\Tigo\MiddleWare\Services\GetCosInformationService;
 
 use Illuminate\Http\Request;
 
@@ -9,13 +12,14 @@ class OptInOptOutController extends Controller {
 
 	protected $request ;
 	private   $cosoptions 	= 	[1 => 'Comverse_test',2 => 'Comverse_test2'];
+	protected $logfile = '/logs/ussd_optInOut.log';
+	protected $originalCos;
 
-	protected $logfile = '/logs/ussd_package_usage.log';
-
-	function __construct(Request $request) 
+	function __construct(Request $request,OriginalCOS $originalCos) 
 	{
-		$this->request = 	$request;
-		$this->menu    =	$this->getMainMenu();
+		$this->request 		= 	$request;
+		$this->originalCos 	= 	$originalCos;
+		$this->menu    		=	$this->getMainMenu();
 
 	}
 
@@ -31,14 +35,27 @@ class OptInOptOutController extends Controller {
 		// 5. Push USSD to the handset
 		
 	// is this the first attempt ?
-     if($input=$this->request->has('input') && $msisdn=$this->request->get('msisdn'))
+     if($input=$this->request->has('input') && $this->request->has('msisdn') && $this->request->has('session'))
      {
-     	$input = (int) $input;
+     	$msisdn 	= 	$this->request->get('msisdn');
+     	$session 	= 	$this->request->get('session');
+     	$input = (int) $this->request->get('input');
 
-     	switch ($input) {
+     	// Validate MSISDN 
+		if(!(strlen($msisdn) == 12) || !(substr($msisdn, 0,5)=='25072'))
+		{
+			$this->menu = 'Invalid MSISDN.';
+			 // Log the response menu
+		   	 $this->log('Response menu: '.$this->menu);
+		   	 // Push menu to the device
+		   	return $this->ussdResponse($this->menu,'FB'); 
+		}
+
+       	switch ($input) {
      		case ($input >0 && $input < 3):
      			# We are looking for hospitals
-     			$this->menu 	= 	$this->migrateCOS($msisdn,$input);
+     			$this->menu 	= 	$this->migrateCOS($msisdn,$input,$session);
+
      			$this->Freeflow = 	'FB';
      			break;
      		default:
@@ -54,7 +71,6 @@ class OptInOptOutController extends Controller {
    	 $this->log($this->request->all());
    	 // Log the response menu
    	 $this->log('Response menu: '.$this->menu);
-
    	 // Push menu to the device
    	return $this->ussdResponse($this->menu,$this->Freeflow);  
 
@@ -76,19 +92,22 @@ class OptInOptOutController extends Controller {
 	/**
 	 * Migrate COS of a subscriber
 	 */ 
-	private function migrateCOS($msisdn,$option)
+	private function migrateCOS($msisdn,$input,$session)
 	{
 		$this->log('message : '.'Asked to change the cos of a subscriber');
 
-		// 1. Backup current Cos
-		// 2. if subscriber cos is well saved
-		if($this->backupCos($msisdn))
-		{
+		//  Backup current Cos
+		if($this->backupCos($msisdn,$input,$session))
+		{   
+			// if subscriber cos is well saved
 			// Attempt to change the COS
-			if($this->setCOS($msisdn,$option))
+			$newCos 	=	'Comverse_test';
+			
+			if($this->setCOS($msisdn,$newCos))
 			{
 				return $this->menu = 'You got your promotion';
 			}
+
 			// Something went wrong
 			return $this->menu = 'Something went wrong while giving you the package';	
 		}
@@ -96,38 +115,29 @@ class OptInOptOutController extends Controller {
 		return $this->menu = 'Could not get your current COS';		
 	}
 
-	private function backupCos($msisdn)
+	/**
+	 * Keep original COS
+	 */ 
+	private function backupCos($msisdn,$input,$session)
 	{
 		$this->log('message : '.' Start to backup the current COS...');
 
-		// Get the actual COS
-		// Save COS and return the status
+	    // Get the actual COS
+		$originalCos = (new GetCosInformationService)->getCos($msisdn)->COSName;
 		
-		/**
-		 * @todo impliment PackageUsageRepo
-		 */
-	 return true; //  $this->PackageUsageRepo->saveCos($msisdn,$originalCos);
-
-	}
-	/** Get the Class of service for the current subscriber */
-	private function getCOS($msisdn)
-	{
-		$this->log('message : '.' trying to retrieve current subscriber COS');
-
-		// 1. Call API $this->api->getCos()
-		// 2. log obtained information
-		// Return data
-		return true;
+		// Save COS and return the status
+	    return (new $this->originalCos)->insert($originalCos,$msisdn,$input,$session); 
 	}
 
-	/** set the class of service */
-	private function setCOS()
+	/**
+	 * Set new COS
+	 * 250728413399
+	 * 250728487656
+	 */ 
+	public function setCOS($msisdn,$cos)
 	{
-		$this->log('message : '.' trying to change the COS Of the subscriber');
+		$this->log('message : '.'Trying to  set a new cos...');
 
-		//1. 	Call API $this->api->setCos()
-		//2.	Log obtained information 
-		//3.	return true or false
-		return true;
+		return (new SetCosService)->setCos($msisdn,$cos);
 	}
 }

@@ -11,7 +11,7 @@ abstract class Controller extends BaseController {
  	/**
  	 * Log file name 
  	 */
- 	protected $logfile = '/logs/ussd_Mhealth.log';
+ 	protected $logfile ;
  	/**
  	 * USSD menu to push on the device
  	 */
@@ -50,7 +50,7 @@ abstract class Controller extends BaseController {
   		$message 	= 	json_encode($message);
   	}
 
-	Log::useDailyFiles(storage_path().$this->logfile);
+	  Log::useDailyFiles(storage_path().$this->logfile);
 
     Log::info(json_encode($message));
   }

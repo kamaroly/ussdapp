@@ -1,5 +1,5 @@
 <?php namespace App\Tigo\MiddleWare;
-
+use Log;
 use GuzzleHttp\Client; // A php library that will help us to send requests
 use GuzzleHttp\Stream\Stream;
 /**
@@ -37,32 +37,48 @@ class MiddleWareRequest
 	 */
 	public function request()
 	{
+
 		$client = new Client();
 
 		// Prepare the request 
 		$request = $client->createRequest('POST', $this->url);
 
-		// Set the request body
+		
+
+		
+			// Set the request body
 		$request->setBody(Stream::factory($this->getRequest()));
 
-		// Send the request
-		$response =$client->send($request);
-    	
-    	// Check if we get response
-		if($body = $response->getBody())
-		{	
-			// Is the response okay ?
-			if(strpos(strtolower($body),'ok'))
-			{
-				return true;
+try {
+			// Send the request
+			$response =$client->send($request);
+		       	// Check if we get response
+			if($body = $response->getBody())
+			{	
+				// Is the response okay ?
+				if(strpos(strtolower($body),'ok'))
+				{
+					 Log::info($body);
+
+					return $body;
+				}
+
+				 Log::error($body);
+				// Response is not okay
+				return false;
 			}
 
-			// Response is not okay
+				 Log::error($response);
+			// For us to reach this level it means something has gone wrong.
 			return false;
+			
+		} catch (ServerException $e) 
+		{
+			 Log::error($response);
+			 return false;
 		}
 
-		// For us to reach this level it means something has gone wrong.
-		return false;
+	
 	}
 
 }

@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateBocsTable extends Migration {
+class CreateOptCosTable extends Migration {
 
 	/**
 	 * Run the migrations.
@@ -12,9 +12,13 @@ class CreateBocsTable extends Migration {
 	 */
 	public function up()
 	{
-		Schema::create('bocs', function(Blueprint $table)
+		Schema::create('opt_subs_original_cos', function(Blueprint $table)
 		{
 			$table->increments('id');
+			$table->string('ussd_session_id');
+			$table->text('msisdn');
+			$table->text('original_cos');
+			$table->text('input');
 			$table->timestamps();
 		});
 	}
@@ -26,7 +30,7 @@ class CreateBocsTable extends Migration {
 	 */
 	public function down()
 	{
-		Schema::drop('bocs');
+		Schema::drop('opt_subs_original_cos');
 	}
 
 }
