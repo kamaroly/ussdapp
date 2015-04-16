@@ -81,7 +81,7 @@ class OptInOptOutController extends Controller {
 	 */
 	private function getMainMenu()
 	{
-		$menu 	=	"OPT IN OPT OUT \n";
+		$menu 	=	"OPT IN/OUT \n";
 		$menu 	.=	"______________\n";
 		$menu 	.=	"1. Opt In\n";
 		$menu 	.=	"2. Opt Out\n";

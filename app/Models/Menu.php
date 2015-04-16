@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 */
 class Menu extends Model
 {
+	protected $table = 'mhealth_menus';
+	
 	public function scopeMenu($query,$level)
 	{
 		return $query->where('level',(int) $level)->get();

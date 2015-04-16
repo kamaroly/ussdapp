@@ -68,14 +68,23 @@ class GetPackageUsageService
 
 		// $response['PackageDescription']    = $doc->getElementsByTagName("PackageDescription")->item(0)->nodeValue;
 
-		// $response['Wallets']    = $doc->getElementsByTagName("Wallets")->item(0)->nodeValue;
+		$response['Wallets']    = $doc->getElementsByTagName("Wallets")->item(0)->nodeValue;
 
 		$response['Remaining']    = $doc->getElementsByTagName("Ressources")->item(0)->nodeValue;
 
 		// $response['WalletDescription']    = $doc->getElementsByTagName("WalletDescription")->item(0)->nodeValue;
 
-		$response['Usage']    = $doc->getElementsByTagName("Usage")->item(0)->nodeValue;
+		$response['Usage']    = $response['Remaining'] - $doc->getElementsByTagName("Usage")->item(0)->nodeValue;
 
+		// If wallet is data convert to MB
+		if($response['Wallets'] == 'Data')
+		{
+		   $response['Remaining'] /=pow(1024,2);
+		   $response['Remaining']  = round($response['Remaining'], 2);
+		   
+		   $response['Usage']/=pow(1024,2);
+		    $response['Usage']  = round($response['Usage'], 2);
+		}
 	 return $response;		
 	}
 }
